@@ -1,0 +1,16 @@
+# Ignore artifacts:
+build
+coverage
+node_modules
+
+# Ignore configuration and environment files:
+.env
+*.config.js
+
+# Ignore specific file types:
+*.min.js
+*.min.css
+
+# Ignore specific generated sources:
+package-lock.json
+yarn.lock
