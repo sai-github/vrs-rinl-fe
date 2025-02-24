@@ -10,6 +10,7 @@ import { Dialog, DialogPanel } from '@headlessui/react';
 import Home from './pages/Home';
 import Calculator from './pages/Calculator';
 import { NavLink, Route, Routes } from 'react-router';
+import Summary from './components/Summary';
 
 const navigation = [
   { name: 'Home', href: '/' },
@@ -123,6 +124,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/calculator" element={<Calculator />} />
+        <Route path="/summary" element={<Summary />} />
       </Routes>
     </div>
   );

@@ -1,112 +1,247 @@
 import { Icon } from '@iconify/react';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { forwardRef, useEffect, useState } from 'react';
+import { Control, Controller, useForm, UseFormGetValues } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 
-// Define the form schema using Zod
-const calculatorSchema = z.object({
-  basic: z
-    .string()
-    .regex(/^\d+([,]\d+)*$/, 'Enter your basic pay'),
-  da: z
-    .string()
-    .regex(/^\d+([,]\d+)*$/, 'Enter your Dearness Allowance'),
-  dateOfJoining: z.string().min(1, 'Date of joining is required'),
-  dateOfRetirement: z.string().min(1, 'Expected date of retirement is required'),
-  pfMonthlyContribution: z
-    .number()
-    .min(0, 'PF contribution')
-    .default(12),
-  sbfpMonthlyContribution: z
-    .number()
-    .min(0, 'SBFP contribution')
-    .default(3)
+import {
+  calculateServicePeriod,
+  calculateSalaryInfo,
+  calculateVRSBenefits,
+  calculateComparison
+} from '@/utils/calculationUtils';
+import { CalculatedData, calculatorFormSchema, Step } from '@/types';
+import { useNavigate } from 'react-router';
+import { formatToDisplayDate } from '@/utils/dateUtils';
+import { formatCurrency } from '@/utils/currencyUtils';
+
+interface EditableFieldProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  isEditing: boolean;
+  onEdit: () => void;
+  error?: string;
+}
+
+const EditableField = forwardRef<
+  HTMLInputElement,
+  EditableFieldProps>(({ label, value, isEditing, onEdit, error, ...props }, ref) => {
+  return (
+    <div className="relative">
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <div className="mt-1 flex rounded-md shadow-sm">
+        {isEditing ? (
+          <input
+            ref={ref}
+            className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+            {...props}
+          />
+        ) : (
+          <div className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-gray-50 px-3 py-2">
+            <span className="block truncate text-sm">
+              {value}
+            </span>
+            <button
+              type="button"
+              onClick={onEdit}
+              className="ml-2 text-indigo-600 hover:text-indigo-500"
+            >
+              <Icon icon="heroicons:pencil-square" className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+      </div>
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+    </div>
+  );
 });
 
-type CalculatorFormData = z.infer<typeof calculatorSchema>;
-
-interface CalculatedData extends CalculatorFormData {
-  basicPlusDA: number;
-  perDaySalary: number;
-  todayDate: string;
-  completedService: string;
-  leftOutService: string;
-  completedServiceDecimal: string;
-  leftOutServiceDecimal: string;
+interface EditableDateFieldProps {
+  label: string;
+  name: 'dateOfJoining' | 'dateOfRetirement';
+  control: Control<CalculatorFormData>;
+  isEditing: boolean;
+  onEdit: () => void;
+  getValues: UseFormGetValues<CalculatorFormData>;
 }
 
-type StepStatus = 'complete' | 'current' | 'upcoming';
+const EditableDateField = ({ 
+  label, 
+  name, 
+  control, 
+  isEditing, 
+  onEdit,
+  getValues 
+}: EditableDateFieldProps) => {
+  return (
+    <div className="relative">
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <div className="mt-1 flex rounded-md shadow-sm">
+        {isEditing ? (
+          <Controller
+            control={control}
+            name={name}
+            render={({ field }) => (
+              <input
+                type="date"
+                value={field.value.toISOString().split('T')[0]}
+                onChange={(e) => field.onChange(new Date(e.target.value))}
+                className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+              />
+            )}
+          />
+        ) : (
+          <div className="flex w-full items-center justify-between rounded-md border border-gray-300 bg-gray-50 px-3 py-2">
+            <span className="block truncate text-sm">
+              {formatToDisplayDate(getValues(name))}
+            </span>
+            <button
+              type="button"
+              onClick={onEdit}
+              className="ml-2 text-indigo-600 hover:text-indigo-500"
+            >
+              <Icon icon="heroicons:pencil-square" className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
-interface Step {
-  id: number;
-  name: string;
-  status: StepStatus;
+interface ReadOnlyFieldProps {
+  label: string;
+  value: string;
 }
+
+function ReadOnlyField({ label, value }: ReadOnlyFieldProps) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700">{label}</label>
+      <div className="mt-1 rounded-md border border-gray-300 bg-gray-50 px-3 py-2">
+        <span className="block truncate text-sm">{value}</span>
+      </div>
+    </div>
+  );
+}
+
+type CalculatorFormData = z.infer<typeof calculatorFormSchema>;
 
 function Calculator() {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [calculatedData, setCalculatedData] = useState<CalculatedData | null>(
     null
   );
   const [steps, setSteps] = useState<Step[]>([
     { id: 1, name: 'Your role information', status: 'current' },
-    { id: 2, name: 'Details about tenure', status: 'upcoming' },
-    { id: 3, name: 'Preview', status: 'upcoming' }
+    { id: 2, name: 'Confirm your information', status: 'upcoming' }
   ]);
+  const [canUpdate, setCanUpdate] = useState(false);
+  const [selectedField, setSelectedField] = useState<string | null>(null);
 
   const {
     register,
-    handleSubmit,
-    formState: { errors }
+    formState: { errors },
+    setValue,
+    getValues,
+    trigger,
+    control
   } = useForm<CalculatorFormData>({
-    resolver: zodResolver(calculatorSchema),
+    resolver: zodResolver(calculatorFormSchema),
     defaultValues: {
       pfMonthlyContribution: 12,
-      sbfpMonthlyContribution: 3
-    }
+      sbfpMonthlyContribution: 3,
+      dateOfJoining: new Date('1969-01-01'),
+      dateOfRetirement: new Date('2025-03-31')
+    },
+    mode: 'onChange' // Enable validation on change
   });
 
-  const calculateDerivedValues = (data: CalculatorFormData) => {
-    const today = new Date();
-    const joining = new Date(data.dateOfJoining);
-    const retirement = new Date(data.dateOfRetirement);
+  // Update loading of saved data
+  useEffect(() => {
+    const savedData = localStorage.getItem('calculatorFormData');
+    console.log('savedData', savedData);
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData) as CalculatorFormData;
+        console.log('raw parsedData', parsedData);
 
-    // Calculate Basic + DA
-    const basicPlusDA =
-      data.basic
-        .split(',')
-        .map(Number)
-        .reduce((a, b) => a + b, 0) +
-      data.da
-        .split(',')
-        .map(Number)
-        .reduce((a, b) => a + b, 0);
-
-    // Calculate service details
-    const completedYears = Math.floor(
-      (today.getTime() - joining.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
-    );
-    const leftOutYears = Math.floor(
-      (retirement.getTime() - today.getTime()) / (365.25 * 24 * 60 * 60 * 1000)
-    );
-
-    return {
-      ...data,
-      basicPlusDA,
-      perDaySalary: basicPlusDA / 30,
-      todayDate: today.toISOString().split('T')[0],
-      completedService: `${completedYears} years`,
-      leftOutService: `${leftOutYears} years`,
-      completedServiceDecimal: completedYears.toFixed(2),
-      leftOutServiceDecimal: leftOutYears.toFixed(2)
-    };
-  };
+        // Type-safe way to set form values
+        if (typeof parsedData.basic === 'number') {
+          setValue('basic', parsedData.basic);
+        }
+        if (typeof parsedData.da === 'number') {
+          setValue('da', parsedData.da);
+        }
+        if (typeof parsedData.dateOfJoining === 'string') {
+          setValue('dateOfJoining', new Date(parsedData.dateOfJoining));
+        }
+        if (typeof parsedData.dateOfRetirement === 'string') {
+          setValue('dateOfRetirement', new Date(parsedData.dateOfRetirement));
+        }
+        if (typeof parsedData.pfMonthlyContribution === 'number') {
+          setValue('pfMonthlyContribution', parsedData.pfMonthlyContribution);
+        }
+        if (typeof parsedData.sbfpMonthlyContribution === 'number') {
+          setValue(
+            'sbfpMonthlyContribution',
+            parsedData.sbfpMonthlyContribution
+          );
+        }
+      } catch (error) {
+        console.error('Error loading saved form data:', error);
+        // Optionally clear invalid data
+        localStorage.removeItem('calculatorFormData');
+      }
+    }
+  }, [setValue]);
 
   const onSubmit = (data: CalculatorFormData) => {
-    const calculatedValues = calculateDerivedValues(data);
-    setCalculatedData(calculatedValues);
-    handleNext();
+    // Save form data (need to convert dates to strings for localStorage)
+    const storageData = {
+      ...data,
+      dateOfJoining: data.dateOfJoining.toISOString(),
+      dateOfRetirement: data.dateOfRetirement.toISOString()
+    };
+    localStorage.setItem('calculatorFormData', JSON.stringify(storageData));
+
+    // Calculate all derived values
+    const today = new Date();
+    const servicePeriod = calculateServicePeriod(
+      data.dateOfJoining,
+      data.dateOfRetirement,
+      today
+    );
+    const salaryInfo = calculateSalaryInfo(
+      data.basic,
+      data.da,
+      servicePeriod.leftOutMonths
+    );
+    const vrsCalculations = calculateVRSBenefits(
+      salaryInfo.perDaySalary,
+      servicePeriod.completedServiceDecimal,
+      servicePeriod.leftOutServiceDecimal,
+      salaryInfo.basicPlusDATillRetirement
+    );
+    const comparisonMetrics = calculateComparison(
+      salaryInfo.basicPlusDA,
+      servicePeriod.leftOutMonths,
+      salaryInfo.pfContribution,
+      salaryInfo.sbfpContribution,
+      vrsCalculations.afterTaxAmount,
+      vrsCalculations.maturedAmountAtRetirement
+    );
+
+    const calculatedData: CalculatedData = {
+      ...data,
+      ...servicePeriod,
+      ...salaryInfo,
+      vrsCalculations,
+      comparisonMetrics
+    };
+
+    setCalculatedData(calculatedData);
+    navigate('/summary', { state: { calculatedData } });
   };
 
   const updateStepStatuses = (newCurrentStep: number) => {
@@ -133,7 +268,15 @@ function Calculator() {
     updateStepStatuses(stepId);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
+    // Trigger validation before proceeding
+    const isValidForm = await trigger();
+    if (!isValidForm) {
+      return; // Don't proceed if form is invalid
+    }
+
+    console.log('[Current data]', getValues());
+
     const nextStep = Math.min(currentStep + 1, steps.length);
     setCurrentStep(nextStep);
     updateStepStatuses(nextStep);
@@ -196,6 +339,35 @@ function Calculator() {
     );
   };
 
+  const handleEdit = (fieldName: string) => {
+    setSelectedField(fieldName);
+    setCanUpdate(true);
+  };
+
+  const handleUpdate = async () => {
+    // Validate before updating
+    const isValidForm = await trigger();
+    if (!isValidForm) {
+      return;
+    }
+
+    setCanUpdate(false);
+    setSelectedField(null);
+    const formData = getValues();
+    onSubmit(formData);
+  };
+
+  const handleSubmit = async() => {
+    // Validate before updating
+    const isValidForm = await trigger();
+    if (!isValidForm) {
+      return;
+    }
+
+    const formData = getValues();
+    onSubmit(formData);
+  }
+
   const renderStepContent = (id: number) => {
     switch (id) {
       case 1:
@@ -217,9 +389,12 @@ function Calculator() {
                   </label>
                   <div className="mt-2">
                     <input
-                      type="text"
-                      {...register('basic')}
-                      placeholder="Enter comma-separated values"
+                      type="number"
+                      step="1"
+                      {...register('basic', {
+                        valueAsNumber: true,
+                      })}
+                      placeholder="e.g., 77380.00"
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                     />
                     {errors.basic && (
@@ -228,6 +403,9 @@ function Calculator() {
                       </p>
                     )}
                   </div>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Enter your basic pay amount
+                  </p>
                 </div>
 
                 {/* DA */}
@@ -237,9 +415,12 @@ function Calculator() {
                   </label>
                   <div className="mt-2">
                     <input
-                      type="text"
-                      {...register('da')}
-                      placeholder="Enter comma-separated values"
+                      type="number"
+                      step="1"
+                      {...register('da', {
+                        valueAsNumber: true
+                      })}
+                      placeholder="e.g., 168534.00"
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                     />
                     {errors.da && (
@@ -248,6 +429,9 @@ function Calculator() {
                       </p>
                     )}
                   </div>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Enter your dearness allowance amount
+                  </p>
                 </div>
 
                 {/* Date of Joining */}
@@ -256,10 +440,17 @@ function Calculator() {
                     Date of Joining
                   </label>
                   <div className="mt-2">
-                    <input
-                      type="date"
-                      {...register('dateOfJoining')}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                    <Controller
+                      control={control} // Add control to useForm destructuring
+                      name="dateOfJoining"
+                      render={({ field }) => (
+                        <input
+                          type="date"
+                          value={field.value.toISOString().split('T')[0]}
+                          onChange={(e) => field.onChange(new Date(e.target.value))}
+                          className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        />
+                      )}
                     />
                     {errors.dateOfJoining && (
                       <p className="mt-1 text-sm text-red-600">
@@ -275,10 +466,17 @@ function Calculator() {
                     Date of Retirement
                   </label>
                   <div className="mt-2">
-                    <input
-                      type="date"
-                      {...register('dateOfRetirement')}
-                      className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                    <Controller
+                      control={control}
+                      name="dateOfRetirement"
+                      render={({ field }) => (
+                        <input
+                          type="date"
+                          value={field.value.toISOString().split('T')[0]}
+                          onChange={(e) => field.onChange(new Date(e.target.value))}
+                          className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                        />
+                      )}
                     />
                     {errors.dateOfRetirement && (
                       <p className="mt-1 text-sm text-red-600">
@@ -296,11 +494,17 @@ function Calculator() {
                   <div className="mt-2">
                     <input
                       type="number"
+                      step="0.1"
                       {...register('pfMonthlyContribution', {
-                        valueAsNumber: true
+                        valueAsNumber: true,
                       })}
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                     />
+                    {errors.pfMonthlyContribution && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.pfMonthlyContribution.message}
+                      </p>
+                    )}
                     <p className="mt-1 text-sm text-gray-500">
                       Company contribution (12% of Basic plus DA)
                     </p>
@@ -315,11 +519,17 @@ function Calculator() {
                   <div className="mt-2">
                     <input
                       type="number"
+                      step="0.1"
                       {...register('sbfpMonthlyContribution', {
                         valueAsNumber: true
                       })}
                       className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
                     />
+                    {errors.sbfpMonthlyContribution && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.sbfpMonthlyContribution.message}
+                      </p>
+                    )}
                     <p className="mt-1 text-sm text-gray-500">
                       Company contribution (3% of Basic plus DA)
                     </p>
@@ -333,85 +543,176 @@ function Calculator() {
       case 2:
         return (
           <div className="space-y-12 p-6">
-            <div className='pb-12'>
-              <h2 className="text-base/7 font-semibold text-gray-900">
-                Calculated Values
-              </h2>
-              <p className="mt-1 text-sm/6 text-gray-600">
-                Auto-calculated values based on your input.
-              </p>
+            <div className="pb-12">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-base/7 font-semibold text-gray-900">
+                    Service Period Details
+                  </h2>
+                  <p className="mt-1 text-sm/6 text-gray-600">
+                    Review and update your information if needed
+                  </p>
+                </div>
+                {!canUpdate && (
+                  <button
+                    type="button"
+                    onClick={() => setCanUpdate(true)}
+                    className="rounded-md bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100"
+                  >
+                    Edit Values
+                  </button>
+                )}
+                {canUpdate && (
+                  <button
+                    type="button"
+                    onClick={handleUpdate}
+                    className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                  >
+                    Update Calculations
+                  </button>
+                )}
+              </div>
 
-              {calculatedData && (
-                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div className="sm:col-span-3">
-                    <label className="block text-sm/6 font-medium text-gray-500">
-                      Basic + DA
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        value={calculatedData.basicPlusDA.toLocaleString()}
-                        readOnly
-                        className="block w-full rounded-md bg-gray-50 px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 sm:text-sm/6"
+              <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+                {/* Input Values Section */}
+                <div className="col-span-full">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div>
+                      <EditableField
+                        type="number"
+                        {...register('basic', { valueAsNumber: true })}
+                        label="Basic Pay"
+                        value={formatCurrency(getValues('basic'))}
+                        isEditing={canUpdate && selectedField === 'basic'}
+                        onEdit={() => handleEdit('basic')}
                       />
+                      {errors.basic && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.basic.message}
+                        </p>
+                      )}
                     </div>
-                  </div>
 
-                  <div className="sm:col-span-3">
-                    <label className="block text-sm/6 font-medium text-gray-500">
-                      Per Day Salary
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        value={calculatedData.perDaySalary.toFixed(2)}
-                        readOnly
-                        className="block w-full rounded-md bg-gray-50 px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 sm:text-sm/6"
+                    <div>
+                      <EditableField
+                        type="number"
+                        {...register('da', { valueAsNumber: true })}
+                        label="DA"
+                        value={formatCurrency(getValues('da'))}
+                        isEditing={canUpdate && selectedField === 'da'}
+                        onEdit={() => handleEdit('da')}
                       />
+                      {errors.da && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.da.message}
+                        </p>
+                      )}
                     </div>
-                  </div>
 
-                  <div className="sm:col-span-3">
-                    <label className="block text-sm/6 font-medium text-gray-500">
-                      Completed Service
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        value={calculatedData.completedService}
-                        readOnly
-                        className="block w-full rounded-md bg-gray-50 px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 sm:text-sm/6"
+                    <div>
+                      <EditableDateField
+                        label="Date of Joining"
+                        name="dateOfJoining"
+                        control={control}
+                        isEditing={canUpdate && selectedField === 'dateOfJoining'}
+                        onEdit={() => handleEdit('dateOfJoining')}
+                        getValues={getValues}
                       />
+                      {errors.dateOfJoining && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.dateOfJoining.message}
+                        </p>
+                      )}
                     </div>
-                  </div>
 
-                  <div className="sm:col-span-3">
-                    <label className="block text-sm/6 font-medium text-gray-500">
-                      Service Left
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        value={calculatedData.leftOutService}
-                        readOnly
-                        className="block w-full rounded-md bg-gray-50 px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 sm:text-sm/6"
+                    <div>
+                      <EditableDateField
+                        label="Date of Retirement"
+                        name="dateOfRetirement"
+                        control={control}
+                        isEditing={canUpdate && selectedField === 'dateOfRetirement'}
+                        onEdit={() => handleEdit('dateOfRetirement')}
+                        getValues={getValues}
                       />
+                      {errors.dateOfRetirement && (
+                        <p className="mt-1 text-sm text-red-600">
+                          {errors.dateOfRetirement.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>
-              )}
+
+                {/* Calculated Values Section */}
+                {calculatedData && (
+                  <>
+                    <div className="col-span-full">
+                      <h3 className="text-sm font-medium text-gray-900 mb-4">
+                        Service Information
+                      </h3>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <ReadOnlyField
+                          label="Completed Service"
+                          value={calculatedData.completedService}
+                        />
+                        <ReadOnlyField
+                          label="Service Left"
+                          value={calculatedData.leftOutService}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="col-span-full">
+                      <h3 className="text-sm font-medium text-gray-900 mb-4">
+                        Financial Details
+                      </h3>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <ReadOnlyField
+                          label="Basic + DA"
+                          value={calculatedData.basicPlusDA.toLocaleString(
+                            'en-IN',
+                            {
+                              style: 'currency',
+                              currency: 'INR'
+                            }
+                          )}
+                        />
+                        <ReadOnlyField
+                          label="Per Day Salary"
+                          value={calculatedData.perDaySalary.toLocaleString(
+                            'en-IN',
+                            {
+                              style: 'currency',
+                              currency: 'INR'
+                            }
+                          )}
+                        />
+                        <ReadOnlyField
+                          label="PF Contribution"
+                          value={calculatedData.pfContribution.toLocaleString(
+                            'en-IN',
+                            {
+                              style: 'currency',
+                              currency: 'INR'
+                            }
+                          )}
+                        />
+                        <ReadOnlyField
+                          label="SBFP Contribution"
+                          value={calculatedData.sbfpContribution.toLocaleString(
+                            'en-IN',
+                            {
+                              style: 'currency',
+                              currency: 'INR'
+                            }
+                          )}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        );
-      case 3:
-        return (
-          <div className="p-6">
-            <h3 className="text-lg font-medium mb-4">Preview</h3>
-            {calculatedData && (
-              <pre className="bg-gray-50 p-4 rounded-md overflow-auto">
-                {JSON.stringify(calculatedData, null, 2)}
-              </pre>
-            )}
           </div>
         );
 
@@ -459,13 +760,12 @@ function Calculator() {
       </nav>
 
       {/* Step content */}
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <div>
         {renderStepContent(currentStep)}
 
         {/* Navigation buttons */}
         <div className="flex justify-between p-4 border-t border-gray-200">
           <button
-            type="button"
             onClick={handlePrevious}
             disabled={currentStep === 1}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -476,18 +776,11 @@ function Calculator() {
             />
             Previous
           </button>
-          {currentStep === steps.length ? (
+          {currentStep !== steps.length ? (
+            
             <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
-            >
-              Finish
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleNext}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+              onClick={handleNext}
             >
               Next
               <Icon
@@ -495,9 +788,16 @@ function Calculator() {
                 className="inline-block w-5 h-5 ml-2"
               />
             </button>
+          ) : (
+            <button
+              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
+              onClick={handleSubmit}
+            >
+              Finish
+            </button>
           )}
         </div>
-      </form>
+      </div>
     </main>
   );
 }
