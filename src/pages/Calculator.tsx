@@ -149,10 +149,12 @@ function Calculator() {
   } = useForm<CalculatorFormData>({
     resolver: zodResolver(calculatorFormSchema),
     defaultValues: {
+      basic: 77380.00,
+      da: 168534.00,
       pfMonthlyContribution: 12,
       sbfpMonthlyContribution: 3,
-      dateOfJoining: new Date('1969-01-01'),
-      dateOfRetirement: new Date('2025-03-31')
+      dateOfJoining: new Date('1992-01-28'),
+      dateOfRetirement: new Date('2031-05-31')
     },
     mode: 'onChange' // Enable validation on change
   });

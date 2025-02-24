@@ -2,6 +2,7 @@ import { useLocation, Link } from 'react-router';
 import { Icon } from '@iconify/react';
 import { CalculatedData } from '@/types';
 import { formatCurrency } from '@/utils/currencyUtils';
+import { formatToDisplayDate } from '@/utils/dateUtils'; // Assume this exists for date formatting
 
 function SummaryItem({
   label,
@@ -36,16 +37,77 @@ function Summary() {
   return (
     <main className="mx-auto mt-24 max-w-7xl px-4 sm:px-6 lg:px-8">
       <div className="space-y-12">
+        {/* Service Information */}
+        <section className="bg-white shadow sm:rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-base font-semibold leading-7 text-gray-900">
+              Service Information
+            </h3>
+            <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+              <SummaryItem 
+                label="Date of Joining" 
+                value={formatToDisplayDate(calculatedData.dateOfJoining)}
+              />
+              <SummaryItem 
+                label="Date of Retirement" 
+                value={formatToDisplayDate(calculatedData.dateOfRetirement)}
+              />
+              <SummaryItem 
+                label="Completed Service" 
+                value={calculatedData.completedService}
+              />
+              <SummaryItem 
+                label="Service Left" 
+                value={calculatedData.leftOutService}
+              />
+            </dl>
+          </div>
+        </section>
+
         {/* Basic Information */}
         <section className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-base font-semibold leading-7 text-gray-900">
-              Basic Information
+              Monthly Salary Details
             </h3>
             <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              <SummaryItem label="Basic Pay" value={calculatedData.basic} />
-              <SummaryItem label="DA" value={calculatedData.da} />
-              {/* Add more basic info */}
+              <SummaryItem 
+                label="Basic Pay" 
+                value={formatCurrency(calculatedData.basic)}
+              />
+              <SummaryItem 
+                label="DA" 
+                value={formatCurrency(calculatedData.da)}
+              />
+              <SummaryItem 
+                label="Basic + DA" 
+                value={formatCurrency(calculatedData.basicPlusDA)}
+              />
+              <SummaryItem 
+                label="Per Day Salary" 
+                value={formatCurrency(calculatedData.perDaySalary)}
+              />
+            </dl>
+          </div>
+        </section>
+
+        {/* Contributions */}
+        <section className="bg-white shadow sm:rounded-lg">
+          <div className="px-4 py-5 sm:p-6">
+            <h3 className="text-base font-semibold leading-7 text-gray-900">
+              Monthly Contributions
+            </h3>
+            <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+              <SummaryItem 
+                label="PF Contribution" 
+                value={formatCurrency(calculatedData.pfContribution)}
+                tooltip="Monthly PF contribution"
+              />
+              <SummaryItem 
+                label="SBFP Contribution" 
+                value={formatCurrency(calculatedData.sbfpContribution)}
+                tooltip="Monthly SBFP contribution"
+              />
             </dl>
           </div>
         </section>
@@ -58,44 +120,61 @@ function Summary() {
             </h3>
             <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <SummaryItem
-                label="Compensation (35 days)"
-                value={formatCurrency(
-                  calculatedData.vrsCalculations.compensationForCompletedService
-                )}
-                tooltip="Based on completed service"
+                label="Final Compensation"
+                value={formatCurrency(calculatedData.vrsCalculations.finalCompensation)}
+                tooltip="One-time compensation amount paid at the time of VRS"
               />
               <SummaryItem
-                label="Compensation (25 days)"
-                value={formatCurrency(
-                  calculatedData.vrsCalculations.compensationForLeftService
-                )}
-                tooltip="Based on remaining service"
+                label="After Tax Amount"
+                value={formatCurrency(calculatedData.vrsCalculations.afterTaxAmount)}
+                tooltip="Net amount after applicable tax deductions on VRS compensation"
               />
-              {/* Add more VRS calculations */}
+              <SummaryItem
+                label="Monthly Interest"
+                value={formatCurrency(calculatedData.vrsCalculations.monthlyInterest)}
+                tooltip="Expected monthly interest earnings from investing the VRS amount"
+              />
+              <SummaryItem
+                label="Matured Amount at Retirement"
+                value={formatCurrency(calculatedData.vrsCalculations.maturedAmountAtRetirement)}
+                tooltip="Projected value of VRS amount at retirement age including compound interest"
+              />
             </dl>
           </div>
         </section>
 
-        {/* Comparison Metrics */}
+        {/* Financial Impact */}
         <section className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-base font-semibold leading-7 text-gray-900">
-              Financial Comparison
+              Financial Impact Analysis
             </h3>
             <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <SummaryItem
-                label="Total Till Retirement"
-                value={formatCurrency(
-                  calculatedData.comparisonMetrics.totalFinancials
-                )}
-                tooltip="Expected earnings till retirement"
+                label="Expected Salary Till Retirement"
+                value={formatCurrency(calculatedData.comparisonMetrics.salaryTillRetirement)}
+                tooltip="Total salary you would earn if continuing till retirement"
               />
               <SummaryItem
-                label="VRS Loss"
-                value={formatCurrency(calculatedData.comparisonMetrics.vrsLoss)}
-                tooltip="Financial impact of taking VRS"
+                label="Expected Benefits Till Retirement"
+                value={formatCurrency(calculatedData.comparisonMetrics.benefitsTillRetirement)}
+                tooltip="Additional benefits and allowances you would receive till retirement"
               />
-              {/* Add more comparison metrics */}
+              <SummaryItem
+                label="Total Expected Financial Value"
+                value={formatCurrency(calculatedData.comparisonMetrics.totalFinancials)}
+                tooltip="Total value of all salary and benefits if working till retirement"
+              />
+              <SummaryItem
+                label="Financial Impact of VRS"
+                value={formatCurrency(calculatedData.comparisonMetrics.vrsLoss)}
+                tooltip="Direct financial difference between taking VRS versus working till retirement"
+              />
+              <SummaryItem
+                label="Net Impact with Interest"
+                value={formatCurrency(calculatedData.comparisonMetrics.vrsLossWithInterest)}
+                tooltip="Total financial impact including potential interest earnings/losses"
+              />
             </dl>
           </div>
         </section>
