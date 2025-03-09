@@ -57,9 +57,14 @@ function Home() {
           <div className="mx-auto max-w-7xl px-6 pb-32 pt-36 sm:pt-60 lg:px-8 lg:pt-32">
             <div className="mx-auto max-w-2xl gap-x-4 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
               <div className="relative w-full lg:max-w-xl lg:shrink-0 xl:max-w-2xl">
-                <h1 className="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-7xl">
-                  VRS scheme info <br />
-                  VSP Employees
+                <h1 className="text-pretty text-4xl font-semibold tracking-tighter text-gray-900 sm:text-6xl">
+                  VRS information for
+                  <br />
+                  <span className="text-green-600">
+                    Vizag Steel Plant
+                  </span>{' '}
+                  <br />
+                  Employees
                 </h1>
                 <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:max-w-md sm:text-xl/8 lg:max-w-none">
                   We provide insights you need to make an informed decision
