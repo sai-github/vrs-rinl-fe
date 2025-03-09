@@ -85,24 +85,28 @@ function Summary() {
               <SummaryItem
                 label="Date of Joining"
                 value={formatToDisplayDate(calculatedData.dateOfJoining)}
+                tooltip="Your initial date of joining the organization"
               />
               <SummaryItem
                 label="Date of Retirement"
                 value={formatToDisplayDate(calculatedData.dateOfRetirement)}
+                tooltip="Expected date of retirement if continuing with organization"
               />
               <SummaryItem
                 label="Completed Service"
                 value={calculatedData.completedService}
+                tooltip="Total completed years and months of service (in decimal format)"
               />
               <SummaryItem
                 label="Service Left"
                 value={calculatedData.leftOutService}
+                tooltip="Remaining years and months until retirement (in decimal format)"
               />
             </dl>
           </div>
         </section>
 
-        {/* Basic Information */}
+        {/* Monthly Salary Details section */}
         <section className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-base font-semibold leading-7 text-gray-900">
@@ -112,24 +116,28 @@ function Summary() {
               <SummaryItem
                 label="Basic Pay"
                 value={formatCurrency(calculatedData.basic)}
+                tooltip="Your current basic salary component"
               />
               <SummaryItem
                 label="DA"
                 value={formatCurrency(calculatedData.da)}
+                tooltip="Current Dearness Allowance based on latest rates"
               />
               <SummaryItem
                 label="Basic + DA"
                 value={formatCurrency(calculatedData.basicPlusDA)}
+                tooltip="Total of Basic Pay and Dearness Allowance"
               />
               <SummaryItem
                 label="Per Day Salary"
                 value={formatCurrency(calculatedData.perDaySalary)}
+                tooltip="Daily salary calculated based on Basic + DA"
               />
             </dl>
           </div>
         </section>
 
-        {/* Contributions */}
+        {/* Monthly Contributions section */}
         <section className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
             <h3 className="text-base font-semibold leading-7 text-gray-900">
@@ -139,12 +147,12 @@ function Summary() {
               <SummaryItem
                 label="PF Contribution"
                 value={formatCurrency(calculatedData.pfContribution)}
-                tooltip="Monthly PF contribution"
+                tooltip="Company's contribution of 12% of (Basic + DA) - (including EPS 95 contribution which is paid to employee)"
               />
               <SummaryItem
                 label="SBFP Contribution"
                 value={formatCurrency(calculatedData.sbfpContribution)}
-                tooltip="Monthly SBFP contribution"
+                tooltip="Company's contribution of 3% of Basic plus DA"
               />
             </dl>
           </div>
@@ -165,29 +173,29 @@ function Summary() {
                 value={formatCurrency(
                   calculatedData.vrsCalculations.finalCompensation
                 )}
-                tooltip="One-time compensation amount paid at the time of VRS"
+                tooltip="VRS compensation calculated as: 35 days salary for completed years + 25 days salary for remaining years (Gujarat Pattern), capped at total Basic+DA till retirement"
               />
               <SummaryItem
                 label="After Tax Amount"
                 value={formatCurrency(
                   calculatedData.vrsCalculations.afterTaxAmount
                 )}
-                tooltip="Net amount after applicable tax deductions on VRS compensation"
+                tooltip="Net amount after tax consideration (₹5 Lakh exempt, remaining taxed at 32%)"
               />
               <SummaryItem
                 label="Monthly Interest"
                 value={formatCurrency(
                   calculatedData.vrsCalculations.monthlyInterest
                 )}
-                tooltip="Expected monthly interest earnings from investing the VRS amount"
+                tooltip={`Expected monthly interest earnings from VRS amount at ${calculatedData.bankInterestRate}% bank rate`}
               />
               <SummaryItem
                 label="Matured Amount at Retirement"
-                highlightType={'GOOD'}
                 value={formatCurrency(
                   calculatedData.vrsCalculations.maturedAmountAtRetirement
                 )}
-                tooltip="Projected value of VRS amount at retirement age including compound interest"
+                tooltip="Projected value of VRS amount at retirement considering compound interest annually"
+                highlightType="GOOD"
               />
             </dl>
           </div>
@@ -205,34 +213,34 @@ function Summary() {
                 value={formatCurrency(
                   calculatedData.comparisonMetrics.salaryTillRetirement
                 )}
-                tooltip="Total salary you would earn if continuing till retirement"
+                tooltip="Total Basic + DA + perks till retirement (after 32% tax) from current date"
               />
               <SummaryItem
                 label="Expected Benefits Till Retirement"
                 value={formatCurrency(
                   calculatedData.comparisonMetrics.benefitsTillRetirement
                 )}
-                tooltip="Additional benefits and allowances you would receive till retirement"
+                tooltip="Total PF + SBFP contributions till retirement (tax exempt)"
               />
               <SummaryItem
                 label="Total Expected Financial Value"
                 value={formatCurrency(
                   calculatedData.comparisonMetrics.totalFinancials
                 )}
-                tooltip="Total value of all salary and benefits if working till retirement"
+                tooltip="Total value including salary (post-tax) and benefits (tax-exempt) if working till retirement"
               />
               <SummaryItem
                 label="Financial Impact of VRS"
                 value={formatCurrency(calculatedData.comparisonMetrics.vrsLoss)}
-                tooltip="Direct financial difference between taking VRS versus working till retirement"
+                tooltip="Direct financial loss: Total receivables till retirement (excluding taxes) minus VRS amount after tax"
               />
               <SummaryItem
                 label="Net Impact with Interest"
                 value={formatCurrency(
                   calculatedData.comparisonMetrics.vrsLossWithInterest
                 )}
-                highlightType={'BAD'}
-                tooltip="Total financial impact including potential interest earnings/losses"
+                tooltip="Total financial impact considering VRS amount invested at 5.5% compound interest till retirement"
+                highlightType="BAD"
               />
             </dl>
           </div>
