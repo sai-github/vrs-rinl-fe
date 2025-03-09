@@ -154,7 +154,8 @@ function Calculator() {
       pfMonthlyContribution: 12,
       sbfpMonthlyContribution: 3,
       dateOfJoining: new Date('1992-01-28'),
-      dateOfRetirement: new Date('2031-05-31')
+      dateOfRetirement: new Date('2029-12-31'),
+      bankInterestRate: 5.5
     },
     mode: 'onChange' // Enable validation on change
   });
@@ -223,7 +224,8 @@ function Calculator() {
       salaryInfo.perDaySalary,
       servicePeriod.completedServiceDecimal,
       servicePeriod.leftOutServiceDecimal,
-      salaryInfo.basicPlusDATillRetirement
+      salaryInfo.basicPlusDATillRetirement,
+      data.bankInterestRate
     );
     const comparisonMetrics = calculateComparison(
       salaryInfo.basicPlusDA,
@@ -486,6 +488,9 @@ function Calculator() {
                       </p>
                     )}
                   </div>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Benefits are calculated based on 31st March 2025
+                  </p>
                 </div>
 
                 {/* PF Monthly Contribution */}
@@ -534,6 +539,31 @@ function Calculator() {
                     )}
                     <p className="mt-1 text-sm text-gray-500">
                       Company contribution (3% of Basic plus DA)
+                    </p>
+                  </div>
+                </div>
+
+                {/* Bank Interest Rate */}
+                <div className="sm:col-span-3">
+                  <label className="block text-sm/6 font-medium text-gray-900">
+                    Bank Interest Rate (%)
+                  </label>
+                  <div className="mt-2">
+                    <input
+                      type="number"
+                      step="0.1"
+                      {...register('bankInterestRate', {
+                        valueAsNumber: true
+                      })}
+                      className="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
+                    />
+                    {errors.bankInterestRate && (
+                      <p className="mt-1 text-sm text-red-600">
+                        {errors.bankInterestRate.message}
+                      </p>
+                    )}
+                    <p className="mt-1 text-sm text-gray-500">
+                      Bank interest rate (5.5% optimistic assumption)
                     </p>
                   </div>
                 </div>

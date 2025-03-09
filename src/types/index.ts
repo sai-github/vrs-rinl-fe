@@ -47,7 +47,16 @@ export const calculatorFormSchema = z.object({
     })
     .min(0, 'SBFP contribution cannot be negative')
     .max(100, 'SBFP contribution cannot exceed 100%')
-    .default(3)
+    .default(3),
+    
+  bankInterestRate: z
+    .number({
+      required_error: 'Bank interest rate is required',
+      invalid_type_error: 'Bank interest rate must be a number'
+    })
+    .min(0, 'Bank interest rate cannot be negative')
+    .max(15, 'Bank interest rate realistically cannot exceed 15%')
+    .default(5.5)
 });
 
 // Add superRefine for date validation (check how this is being used)

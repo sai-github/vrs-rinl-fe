@@ -5,7 +5,7 @@ import {
   VRSCalculations
 } from '@/types';
 
-const BANK_INTEREST_RATE = 5.5;
+// const BANK_INTEREST_RATE = 5.5;
 const TAX_RATE = 0.32;
 const TAX_FREE_AMOUNT = 500000;
 
@@ -60,7 +60,8 @@ export const calculateVRSBenefits = (
   perDaySalary: number,
   completedServiceDecimal: number,
   leftOutServiceDecimal: number,
-  basicPlusDATillRetirement: number
+  basicPlusDATillRetirement: number,
+  bankInterestRate: number
 ): VRSCalculations => {
   const comp1 = perDaySalary * 35 * completedServiceDecimal;
   const comp2 = perDaySalary * 25 * leftOutServiceDecimal;
@@ -75,9 +76,9 @@ export const calculateVRSBenefits = (
     totalExtrapolatedCompensation: totalComp,
     finalCompensation: finalComp,
     afterTaxAmount: afterTax,
-    monthlyInterest: (afterTax * BANK_INTEREST_RATE) / (100 * 12),
+    monthlyInterest: (afterTax * bankInterestRate) / (100 * 12),
     maturedAmountAtRetirement:
-      afterTax * Math.pow(1 + BANK_INTEREST_RATE / 100, leftOutServiceDecimal)
+      afterTax * Math.pow(1 + bankInterestRate / 100, leftOutServiceDecimal)
   };
 };
 
