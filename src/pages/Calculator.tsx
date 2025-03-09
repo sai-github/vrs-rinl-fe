@@ -191,6 +191,9 @@ function Calculator() {
             parsedData.sbfpMonthlyContribution
           );
         }
+        if (typeof parsedData.bankInterestRate === 'number') {
+          setValue('bankInterestRate', parsedData.bankInterestRate);
+        }
       } catch (error) {
         console.error('Error loading saved form data:', error);
         // Optionally clear invalid data
