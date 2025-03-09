@@ -14,7 +14,7 @@ import Summary from './components/Summary';
 
 const navigation = [
   { name: 'Home', href: '/' },
-  { name: 'Calculator', href: '/calculator' }
+  { name: 'VRS Calculator', href: '/calculator' }
 ];
 
 function Logo() {

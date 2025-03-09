@@ -1,3 +1,5 @@
+import { NavLink } from 'react-router';
+
 import blooms from '../assets/images/blooms.png';
 import insidePlant1 from '../assets/images/inside plant 1.png';
 import manWorking from '../assets/images/man working.png';
@@ -60,9 +62,7 @@ function Home() {
                 <h1 className="text-pretty text-4xl font-semibold tracking-tighter text-gray-900 sm:text-6xl">
                   VRS information for
                   <br />
-                  <span className="text-green-600">
-                    Vizag Steel Plant
-                  </span>{' '}
+                  <span className="text-green-600">Vizag Steel Plant</span>{' '}
                   <br />
                   Employees
                 </h1>
@@ -72,6 +72,15 @@ function Home() {
                   you evaluate the financial implications of early retirement
                   versus continued employment
                 </p>
+                {/* Quick action button */}
+                <NavLink to="/calculator">
+                  <button
+                    type="button"
+                    className="mt-8 inline-flex items-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-base sm:text-lg font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  >
+                    VRS Calculator
+                  </button>
+                </NavLink>
               </div>
               <div className="mt-14 flex justify-end gap-8 sm:-mt-44 sm:justify-start sm:pl-20 lg:mt-0 lg:pl-0">
                 <div className="ml-auto w-44 flex-none space-y-8 pt-32 sm:ml-0 sm:pt-80 lg:order-last lg:pt-36 xl:order-none xl:pt-80">
