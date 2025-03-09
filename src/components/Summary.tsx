@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useLocation, Link } from 'react-router';
 import { Icon } from '@iconify/react';
 import { CalculatedData } from '@/types';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { formatToDisplayDate } from '@/utils/dateUtils'; // Assume this exists for date formatting
+import InfoDrawer from './InfoDrawer';
 
 function SummaryItem({
   label,
@@ -12,25 +14,37 @@ function SummaryItem({
 }: {
   label: string;
   value: string | number;
-  highlightType? : 'GOOD' | 'BAD';
+  highlightType?: 'GOOD' | 'BAD';
   tooltip?: string;
 }) {
   const valueClassName = `mt-1 text-sm ${
     highlightType === 'GOOD'
       ? 'text-green-600 font-bold'
       : highlightType === 'BAD'
-      ? 'text-red-600 font-bold'
-      : 'text-gray-900'
+        ? 'text-red-600 font-bold'
+        : 'text-gray-900'
   }`;
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
     <div>
       <dt className="flex items-center text-sm font-medium text-gray-500">
         {label}
         {tooltip && (
-          <span className="ml-2 text-gray-400 hover:text-gray-600 cursor-help">
-            <Icon icon="heroicons:information-circle" className="w-4 h-4" />
-          </span>
+          <>
+            <button
+              onClick={() => setIsDrawerOpen(true)}
+              className="ml-2 text-gray-400 hover:text-gray-600"
+            >
+              <Icon icon="heroicons:information-circle" className="w-4 h-4" />
+            </button>
+            <InfoDrawer
+              isOpen={isDrawerOpen}
+              setIsOpen={setIsDrawerOpen}
+              title={label}
+              content={tooltip}
+            />
+          </>
         )}
       </dt>
       <dd className={valueClassName}>{value}</dd>
@@ -47,14 +61,14 @@ function Summary() {
   return (
     <main className="mx-auto mt-24 max-w-7xl px-4 sm:px-6 lg:px-8">
       <style>
-    {`
+        {`
       @media print {
         .benefits-section {
           page-break-before: always;
         }
       }
     `}
-  </style>
+      </style>
 
       <div className="space-y-12">
         <h2 className="text-xl font-extrabold text-gray-900">
@@ -68,20 +82,20 @@ function Summary() {
               Service Information
             </h3>
             <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              <SummaryItem 
-                label="Date of Joining" 
+              <SummaryItem
+                label="Date of Joining"
                 value={formatToDisplayDate(calculatedData.dateOfJoining)}
               />
-              <SummaryItem 
-                label="Date of Retirement" 
+              <SummaryItem
+                label="Date of Retirement"
                 value={formatToDisplayDate(calculatedData.dateOfRetirement)}
               />
-              <SummaryItem 
-                label="Completed Service" 
+              <SummaryItem
+                label="Completed Service"
                 value={calculatedData.completedService}
               />
-              <SummaryItem 
-                label="Service Left" 
+              <SummaryItem
+                label="Service Left"
                 value={calculatedData.leftOutService}
               />
             </dl>
@@ -95,20 +109,20 @@ function Summary() {
               Monthly Salary Details
             </h3>
             <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              <SummaryItem 
-                label="Basic Pay" 
+              <SummaryItem
+                label="Basic Pay"
                 value={formatCurrency(calculatedData.basic)}
               />
-              <SummaryItem 
-                label="DA" 
+              <SummaryItem
+                label="DA"
                 value={formatCurrency(calculatedData.da)}
               />
-              <SummaryItem 
-                label="Basic + DA" 
+              <SummaryItem
+                label="Basic + DA"
                 value={formatCurrency(calculatedData.basicPlusDA)}
               />
-              <SummaryItem 
-                label="Per Day Salary" 
+              <SummaryItem
+                label="Per Day Salary"
                 value={formatCurrency(calculatedData.perDaySalary)}
               />
             </dl>
@@ -122,13 +136,13 @@ function Summary() {
               Monthly Contributions
             </h3>
             <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
-              <SummaryItem 
-                label="PF Contribution" 
+              <SummaryItem
+                label="PF Contribution"
                 value={formatCurrency(calculatedData.pfContribution)}
                 tooltip="Monthly PF contribution"
               />
-              <SummaryItem 
-                label="SBFP Contribution" 
+              <SummaryItem
+                label="SBFP Contribution"
                 value={formatCurrency(calculatedData.sbfpContribution)}
                 tooltip="Monthly SBFP contribution"
               />
@@ -148,23 +162,31 @@ function Summary() {
             <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <SummaryItem
                 label="Final Compensation"
-                value={formatCurrency(calculatedData.vrsCalculations.finalCompensation)}
+                value={formatCurrency(
+                  calculatedData.vrsCalculations.finalCompensation
+                )}
                 tooltip="One-time compensation amount paid at the time of VRS"
               />
               <SummaryItem
                 label="After Tax Amount"
-                value={formatCurrency(calculatedData.vrsCalculations.afterTaxAmount)}
+                value={formatCurrency(
+                  calculatedData.vrsCalculations.afterTaxAmount
+                )}
                 tooltip="Net amount after applicable tax deductions on VRS compensation"
               />
               <SummaryItem
                 label="Monthly Interest"
-                value={formatCurrency(calculatedData.vrsCalculations.monthlyInterest)}
+                value={formatCurrency(
+                  calculatedData.vrsCalculations.monthlyInterest
+                )}
                 tooltip="Expected monthly interest earnings from investing the VRS amount"
               />
               <SummaryItem
                 label="Matured Amount at Retirement"
                 highlightType={'GOOD'}
-                value={formatCurrency(calculatedData.vrsCalculations.maturedAmountAtRetirement)}
+                value={formatCurrency(
+                  calculatedData.vrsCalculations.maturedAmountAtRetirement
+                )}
                 tooltip="Projected value of VRS amount at retirement age including compound interest"
               />
             </dl>
@@ -180,17 +202,23 @@ function Summary() {
             <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <SummaryItem
                 label="Expected Salary Till Retirement"
-                value={formatCurrency(calculatedData.comparisonMetrics.salaryTillRetirement)}
+                value={formatCurrency(
+                  calculatedData.comparisonMetrics.salaryTillRetirement
+                )}
                 tooltip="Total salary you would earn if continuing till retirement"
               />
               <SummaryItem
                 label="Expected Benefits Till Retirement"
-                value={formatCurrency(calculatedData.comparisonMetrics.benefitsTillRetirement)}
+                value={formatCurrency(
+                  calculatedData.comparisonMetrics.benefitsTillRetirement
+                )}
                 tooltip="Additional benefits and allowances you would receive till retirement"
               />
               <SummaryItem
                 label="Total Expected Financial Value"
-                value={formatCurrency(calculatedData.comparisonMetrics.totalFinancials)}
+                value={formatCurrency(
+                  calculatedData.comparisonMetrics.totalFinancials
+                )}
                 tooltip="Total value of all salary and benefits if working till retirement"
               />
               <SummaryItem
@@ -200,7 +228,9 @@ function Summary() {
               />
               <SummaryItem
                 label="Net Impact with Interest"
-                value={formatCurrency(calculatedData.comparisonMetrics.vrsLossWithInterest)}
+                value={formatCurrency(
+                  calculatedData.comparisonMetrics.vrsLossWithInterest
+                )}
                 highlightType={'BAD'}
                 tooltip="Total financial impact including potential interest earnings/losses"
               />
