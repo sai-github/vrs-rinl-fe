@@ -19,7 +19,7 @@ const navigation = [
 
 function Logo() {
   return (
-    <a href="#" className="-m-1.5 p-1.5">
+    <a href="/" className="-m-1.5 p-1.5">
       <span className="sr-only">VRS RINL</span>
       <img
         alt="Logo for VRS RINL website"
