@@ -261,6 +261,11 @@ function Summary() {
             Print Summary
           </button>
         </div>
+
+        {/* made with love footer */}
+        <footer className="py-4 text-center text-sm text-gray-500">
+          <span>Made with ❤️ on <span className='text-green-600 font-semibold'>RINL</span></span>
+        </footer>
       </div>
     </main>
   );

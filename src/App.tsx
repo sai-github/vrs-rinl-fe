@@ -53,7 +53,7 @@ function App() {
               <span className="sr-only">Open main menu</span>
               <Icon
                 className="size-6"
-                icon="heroicons:bars-3-bottom-left-solid"
+                icon="heroicons:bars-3-bottom-left-solid print:hidden"
               />
             </button>
           </div>
