@@ -7,12 +7,22 @@ import { formatToDisplayDate } from '@/utils/dateUtils'; // Assume this exists f
 function SummaryItem({
   label,
   value,
+  highlightType,
   tooltip
 }: {
   label: string;
   value: string | number;
+  highlightType? : 'GOOD' | 'BAD';
   tooltip?: string;
 }) {
+  const valueClassName = `mt-1 text-sm ${
+    highlightType === 'GOOD'
+      ? 'text-green-600 font-bold'
+      : highlightType === 'BAD'
+      ? 'text-red-600 font-bold'
+      : 'text-gray-900'
+  }`;
+
   return (
     <div>
       <dt className="flex items-center text-sm font-medium text-gray-500">
@@ -23,7 +33,7 @@ function SummaryItem({
           </span>
         )}
       </dt>
-      <dd className="mt-1 text-sm text-gray-900">{value}</dd>
+      <dd className={valueClassName}>{value}</dd>
     </div>
   );
 }
@@ -36,7 +46,21 @@ function Summary() {
 
   return (
     <main className="mx-auto mt-24 max-w-7xl px-4 sm:px-6 lg:px-8">
+      <style>
+    {`
+      @media print {
+        .benefits-section {
+          page-break-before: always;
+        }
+      }
+    `}
+  </style>
+
       <div className="space-y-12">
+        <h2 className="text-xl font-extrabold text-gray-900">
+          Your basic information
+        </h2>
+
         {/* Service Information */}
         <section className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -112,6 +136,9 @@ function Summary() {
           </div>
         </section>
 
+        <h2 className="text-xl font-extrabold text-gray-900 benefits-section">
+          Benefits calculations
+        </h2>
         {/* VRS Calculations */}
         <section className="bg-white shadow sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
@@ -136,6 +163,7 @@ function Summary() {
               />
               <SummaryItem
                 label="Matured Amount at Retirement"
+                highlightType={'GOOD'}
                 value={formatCurrency(calculatedData.vrsCalculations.maturedAmountAtRetirement)}
                 tooltip="Projected value of VRS amount at retirement age including compound interest"
               />
@@ -173,13 +201,15 @@ function Summary() {
               <SummaryItem
                 label="Net Impact with Interest"
                 value={formatCurrency(calculatedData.comparisonMetrics.vrsLossWithInterest)}
+                highlightType={'BAD'}
                 tooltip="Total financial impact including potential interest earnings/losses"
               />
             </dl>
           </div>
         </section>
 
-        <div className="flex justify-end space-x-4">
+        {/* Action btns */}
+        <div className="flex justify-end space-x-4 print:hidden">
           <Link
             to="/calculator"
             className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
