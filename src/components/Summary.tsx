@@ -5,6 +5,7 @@ import { CalculatedData } from '@/types';
 import { formatCurrency } from '@/utils/currencyUtils';
 import { formatToDisplayDate } from '@/utils/dateUtils'; // Assume this exists for date formatting
 import InfoDrawer from './InfoDrawer';
+import TaxDisclaimer from './TaxDisclaimer';
 
 function SummaryItem({
   label,
@@ -17,7 +18,7 @@ function SummaryItem({
   highlightType?: 'GOOD' | 'BAD';
   tooltip?: string;
 }) {
-  const valueClassName = `mt-1 text-2xl font-semibold tracking-tight ${
+  const valueClassName = `mt-1 text-2xl print:text-xl font-semibold tracking-tight ${
     highlightType === 'GOOD'
       ? 'text-green-600'
       : highlightType === 'BAD'
@@ -27,7 +28,7 @@ function SummaryItem({
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   return (
-    <div className="overflow-hidden rounded-lg bg-white px-4 py-5 shadow-sm sm:p-6">
+    <div className="overflow-hidden rounded-lg bg-white p-3 shadow-sm sm:p-6">
       <dt className="truncate flex items-center text-sm font-medium text-gray-500">
         {label}
         {tooltip && (
@@ -92,7 +93,7 @@ function Summary() {
         {/* Service Information */}
         <section className="p-2 sm:p-4">
           <SummaryTitle title="Service Information" />
-          <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
               label="Date of Joining"
               value={formatToDisplayDate(calculatedData.dateOfJoining)}
@@ -119,7 +120,7 @@ function Summary() {
         {/* Monthly Salary Details section */}
         <section className="p-2 sm:p-4 mt-2">
           <SummaryTitle title="Monthly Salary Details" />
-          <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
               label="Basic Pay"
               value={formatCurrency(calculatedData.basic)}
@@ -146,7 +147,7 @@ function Summary() {
         {/* Monthly Contributions section */}
         <section className="p-2 sm:p-4 mt-2">
           <SummaryTitle title="Monthly Contributions" />
-          <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
               label="PF Contribution"
               value={formatCurrency(calculatedData.pfContribution)}
@@ -163,10 +164,13 @@ function Summary() {
         <h2 className="text-xl font-extrabold text-gray-900 benefits-section">
           Benefits calculations
         </h2>
+
+        <TaxDisclaimer />
+        
         {/* VRS Calculations */}
         <section className="p-2 sm:p-4 mt-2">
           <SummaryTitle title="VRS Benefits" />
-          <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
               label="Final Compensation"
               value={formatCurrency(
@@ -202,7 +206,7 @@ function Summary() {
         {/* Financial Impact */}
         <section className="p-2 sm:p-4 mt-2">
           <SummaryTitle title="Financial Impact Analysis" />
-          <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+          <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
               label="Expected Salary Till Retirement"
               value={formatCurrency(
@@ -257,7 +261,7 @@ function Summary() {
         </div>
 
         {/* Contact Me Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 print:hidden">
           <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
             <div>
               <h2 className="text-4xl font-semibold tracking-tight text-gray-900">Get in touch</h2>
