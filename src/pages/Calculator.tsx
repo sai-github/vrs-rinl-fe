@@ -380,7 +380,7 @@ function Calculator() {
       case 1:
         return (
           <div className="space-y-12 p-6">
-            <div className="pb-12">
+            <div>
               <h2 className="text-base/7 font-semibold text-gray-900">
                 Salary Details
               </h2>
@@ -757,7 +757,7 @@ function Calculator() {
   };
 
   return (
-    <main className="mx-auto mt-24 max-w-7xl lg:px-8">
+    <main className="relative mx-auto mt-24 max-w-7xl lg:px-8 pb-16">
       {/* Steps */}
       <nav aria-label="Progress">
         <ol className="divide-y divide-gray-300 rounded-md border border-gray-300 md:flex md:divide-y-0">
@@ -797,41 +797,40 @@ function Calculator() {
       {/* Step content */}
       <div>
         {renderStepContent(currentStep)}
+      </div>
 
-        {/* Navigation buttons */}
-        <div className="flex justify-between p-4 border-t border-gray-200">
+      {/* Navigation buttons */}
+      <div className="fixed inset-x-0 bottom-0 flex justify-between px-12 py-4 bg-white border-t border-gray-200">
+        <button
+          onClick={handlePrevious}
+          disabled={currentStep === 1}
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <Icon
+            icon="heroicons:arrow-left"
+            className="inline-block w-5 h-5 mr-2"
+          />
+          Previous
+        </button>
+        {currentStep !== steps.length ? (
           <button
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
+            onClick={handleNext}
           >
+            Next
             <Icon
-              icon="heroicons:arrow-left"
-              className="inline-block w-5 h-5 mr-2"
+              icon="heroicons:arrow-right"
+              className="inline-block w-5 h-5 ml-2"
             />
-            Previous
           </button>
-          {currentStep !== steps.length ? (
-            
-            <button
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
-              onClick={handleNext}
-            >
-              Next
-              <Icon
-                icon="heroicons:arrow-right"
-                className="inline-block w-5 h-5 ml-2"
-              />
-            </button>
-          ) : (
-            <button
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
-              onClick={handleSubmit}
-            >
-              Finish
-            </button>
-          )}
-        </div>
+        ) : (
+          <button
+            className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
+            onClick={handleSubmit}
+          >
+            Finish
+          </button>
+        )}
       </div>
     </main>
   );
