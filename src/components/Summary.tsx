@@ -262,9 +262,25 @@ function Summary() {
           </button>
         </div>
 
+        {/* Contact Me Section */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+            <div>
+              <h2 className="text-4xl font-semibold tracking-tight text-gray-900">Get in touch</h2>
+              <p className="mt-4 text-base text-gray-600">
+                Have feedback? Feel free to reach out at <a href="mailto:saiediitm@gmail.com" className="font-semibold text-indigo-600">
+                  saiediitm@gmail.com
+                </a>
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* made with love footer */}
         <footer className="py-4 text-center text-sm text-gray-500">
-          <span>Made with ❤️ on <span className='text-green-600 font-semibold'>RINL</span></span>
+          <span>
+            Made with ❤️ on <span className="text-green-600 font-semibold">RINL</span>
+          </span>
         </footer>
       </div>
     </main>
