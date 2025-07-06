@@ -1,7 +1,6 @@
 import { useState } from 'react';
-
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 import './App.css';
-
 import vrsLogo from '/vrs-rinl-logo.svg';
 
 import { Icon } from '@iconify/react';
@@ -13,8 +12,8 @@ import { NavLink, Route, Routes } from 'react-router';
 import Summary from './components/Summary';
 
 const navigation = [
-  { name: 'Home', href: '/' },
-  { name: 'VRS Calculator', href: '/calculator' }
+  { key: 'home', href: '/' },
+  { key: 'vrs_calculator', href: '/calculator' },
 ];
 
 function Logo() {
@@ -32,18 +31,51 @@ function Logo() {
 
 function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { t, i18n } = useTranslation(); // Initialize translation
+
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+  };
 
   return (
     <div className="bg-white">
       {/* Header */}
       <header className="absolute inset-x-0 top-0 z-50">
         <nav
-          aria-label="Global"
+          aria-label="Header"
           className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8 print:p-0"
         >
           <div className="flex lg:flex-1">
             <Logo />
           </div>
+
+          {/* Language Switcher */}
+          <div
+            className="flex items-center gap-1 rounded-full bg-gray-950/5 p-1 print:hidden ml-auto mr-4"
+            role="tablist"
+            aria-orientation="horizontal"
+          >
+            <button
+              onClick={() => changeLanguage('en')}
+              className={`group flex items-center rounded-full px-4 text-sm font-medium ${
+                i18n.language === 'en' ? 'bg-white ring ring-gray-950/5' : ''
+              }`}
+            >
+              <span className="block lg:hidden">En</span>
+              <span className="hidden lg:block">English</span>
+            </button>
+            <button
+              onClick={() => changeLanguage('te')}
+              className={`group flex items-center rounded-full px-4 text-sm font-medium ${
+                i18n.language === 'te' ? 'bg-white ring ring-gray-950/5' : ''
+              }`}
+            >
+              <span className="block lg:hidden">తె</span>
+              <span className="hidden lg:block">తెలుగు</span>
+            </button>
+          </div>
+          
+          {/* Mobile Menu Button */}
           <div className="flex lg:hidden">
             <button
               type="button"
@@ -57,10 +89,12 @@ function App() {
               />
             </button>
           </div>
+          
+          {/* Navigation Links for Large Screens */}
           <div className="hidden lg:flex lg:gap-x-8">
             {navigation.map((item) => (
               <NavLink
-                key={item.name}
+                key={item.key}
                 to={item.href}
                 className={({ isActive }) =>
                   `text-lg font-semibold  ${
@@ -68,7 +102,7 @@ function App() {
                   }`
                 }
               >
-                {item.name}
+                {t(item.key)}
               </NavLink>
             ))}
           </div>
@@ -100,17 +134,17 @@ function App() {
                   <div className="space-y-2 py-6">
                     {navigation.map((item) => (
                       <NavLink
-                        key={item.name}
+                        key={item.key}
                         to={item.href}
                         className={({ isActive }) =>
-                          `-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold ${
+                          `-mx-3 block rounded-lg px-3 py-2 text-base font-semibold ${
                             isActive
                               ? 'bg-blue-50 text-blue-600'
                               : 'text-gray-900 hover:bg-gray-50'
                           }`
                         }
                       >
-                        {item.name}
+                        {t(item.key)}
                       </NavLink>
                     ))}
                   </div>
