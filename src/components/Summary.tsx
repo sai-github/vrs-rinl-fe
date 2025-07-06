@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useLocation, Link } from 'react-router';
 import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 import { CalculatedData } from '@/types';
 import { formatCurrency } from '@/utils/currencyUtils';
-import { formatToDisplayDate } from '@/utils/dateUtils'; // Assume this exists for date formatting
+import { formatToDisplayDate } from '@/utils/dateUtils';
 import InfoDrawer from './InfoDrawer';
 import TaxDisclaimer from './TaxDisclaimer';
 
@@ -63,12 +64,12 @@ function SummaryTitle({ title }: { title: string }) {
         <span className="bg-white pr-3 text-base font-semibold text-indigo-600">{title}</span>
       </div>
     </div>
-
   );
 }
 
 function Summary() {
   const location = useLocation();
+  const { t } = useTranslation();
   const { calculatedData } = location.state as {
     calculatedData: CalculatedData;
   };
@@ -77,127 +78,119 @@ function Summary() {
     <main className="mx-auto mt-24 max-w-7xl px-4 sm:px-6 lg:px-8">
       <style>
         {`
-      @media print {
-        .benefits-section {
-          page-break-before: always;
-        }
-      }
-    `}
+          @media print {
+            .benefits-section {
+              page-break-before: always;
+            }
+          }
+        `}
       </style>
 
       <div className="space-y-4">
         <h2 className="text-xl font-extrabold text-gray-900">
-          Your basic information
+          {t('summary_basic_info')}
         </h2>
 
         {/* Service Information */}
         <section className="p-2 sm:p-4">
-          <SummaryTitle title="Service Information" />
+          <SummaryTitle title={t('summary_service_info')} />
           <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
-              label="Date of Joining"
+              label={t('calculator_doj')}
               value={formatToDisplayDate(calculatedData.dateOfJoining)}
-              tooltip="Your initial date of joining the organization"
+              tooltip={t('summary_tooltip_doj')}
             />
             <SummaryItem
-              label="Date of Retirement"
+              label={t('calculator_dor')}
               value={formatToDisplayDate(calculatedData.dateOfRetirement)}
-              tooltip="Expected date of retirement if continuing with organization"
+              tooltip={t('summary_tooltip_dor')}
             />
             <SummaryItem
-              label="Completed Service"
+              label={t('calculator_completed_service')}
               value={calculatedData.completedService}
-              tooltip="Total completed years and months of service (in decimal format)"
+              tooltip={t('summary_tooltip_completed')}
             />
             <SummaryItem
-              label="Service Left"
+              label={t('calculator_service_left')}
               value={calculatedData.leftOutService}
-              tooltip="Remaining years and months until retirement (in decimal format)"
+              tooltip={t('summary_tooltip_left')}
             />
           </dl>
         </section>
 
         {/* Monthly Salary Details section */}
         <section className="p-2 sm:p-4 mt-2">
-          <SummaryTitle title="Monthly Salary Details" />
+          <SummaryTitle title={t('summary_monthly_salary')} />
           <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
-              label="Basic Pay"
+              label={t('calculator_basic_pay')}
               value={formatCurrency(calculatedData.basic)}
-              tooltip="Your current basic salary component"
+              tooltip={t('summary_tooltip_basic')}
             />
             <SummaryItem
-              label="DA"
+              label={t('calculator_da')}
               value={formatCurrency(calculatedData.da)}
-              tooltip="Current Dearness Allowance based on latest rates"
+              tooltip={t('summary_tooltip_da')}
             />
             <SummaryItem
-              label="Basic + DA"
+              label={t('calculator_basic_da')}
               value={formatCurrency(calculatedData.basicPlusDA)}
-              tooltip="Total of Basic Pay and Dearness Allowance"
+              tooltip={t('summary_tooltip_basic_da')}
             />
             <SummaryItem
-              label="Per Day Salary"
+              label={t('calculator_per_day')}
               value={formatCurrency(calculatedData.perDaySalary)}
-              tooltip="Daily salary calculated based on Basic + DA"
+              tooltip={t('summary_tooltip_per_day')}
             />
           </dl>
         </section>
 
         {/* Monthly Contributions section */}
         <section className="p-2 sm:p-4 mt-2">
-          <SummaryTitle title="Monthly Contributions" />
+          <SummaryTitle title={t('summary_monthly_contributions')} />
           <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
-              label="PF Contribution"
+              label={t('calculator_pf_contribution')}
               value={formatCurrency(calculatedData.pfContribution)}
-              tooltip="Company's contribution of 12% of (Basic + DA) - (including EPS 95 contribution which is paid to employee)"
+              tooltip={t('summary_tooltip_pf')}
             />
             <SummaryItem
-              label="SBFP Contribution"
+              label={t('calculator_sbfp_contribution')}
               value={formatCurrency(calculatedData.sbfpContribution)}
-              tooltip="Company's contribution of 3% of Basic plus DA"
+              tooltip={t('summary_tooltip_sbfp')}
             />
           </dl>
         </section>
 
         <h2 className="text-xl font-extrabold text-gray-900 benefits-section">
-          Benefits calculations
+          {t('summary_benefits_calc')}
         </h2>
 
         <TaxDisclaimer />
         
         {/* VRS Calculations */}
         <section className="p-2 sm:p-4 mt-2">
-          <SummaryTitle title="VRS Benefits" />
+          <SummaryTitle title={t('summary_vrs_benefits')} />
           <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
-              label="Final Compensation"
-              value={formatCurrency(
-                calculatedData.vrsCalculations.finalCompensation
-              )}
-              tooltip="VRS compensation calculated as: 35 days salary for completed years + 25 days salary for remaining years (Gujarat Pattern), capped at total Basic+DA till retirement"
+              label={t('summary_final_comp')}
+              value={formatCurrency(calculatedData.vrsCalculations.finalCompensation)}
+              tooltip={t('summary_tooltip_final_comp')}
             />
             <SummaryItem
-              label="After Tax Amount"
-              value={formatCurrency(
-                calculatedData.vrsCalculations.afterTaxAmount
-              )}
-              tooltip="Net amount after tax consideration (₹5 Lakh exempt, remaining taxed at 32%)"
+              label={t('summary_after_tax')}
+              value={formatCurrency(calculatedData.vrsCalculations.afterTaxAmount)}
+              tooltip={t('summary_tooltip_after_tax')}
             />
             <SummaryItem
-              label="Monthly Interest"
-              value={formatCurrency(
-                calculatedData.vrsCalculations.monthlyInterest
-              )}
-              tooltip={`Expected monthly interest earnings from VRS amount at ${calculatedData.bankInterestRate}% bank rate`}
+              label={t('summary_monthly_interest')}
+              value={formatCurrency(calculatedData.vrsCalculations.monthlyInterest)}
+              tooltip={t('summary_tooltip_monthly_interest', { rate: calculatedData.bankInterestRate })}
             />
             <SummaryItem
-              label="Matured Amount at Retirement"
-              value={formatCurrency(
-                calculatedData.vrsCalculations.maturedAmountAtRetirement
-              )}
-              tooltip="Projected value of VRS amount at retirement considering compound interest annually"
+              label={t('summary_matured_amount')}
+              value={formatCurrency(calculatedData.vrsCalculations.maturedAmountAtRetirement)}
+              tooltip={t('summary_tooltip_matured')}
               highlightType="GOOD"
             />
           </dl>
@@ -205,40 +198,32 @@ function Summary() {
 
         {/* Financial Impact */}
         <section className="p-2 sm:p-4 mt-2">
-          <SummaryTitle title="Financial Impact Analysis" />
+          <SummaryTitle title={t('summary_financial_impact')} />
           <dl className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SummaryItem
-              label="Expected Salary Till Retirement"
-              value={formatCurrency(
-                calculatedData.comparisonMetrics.salaryTillRetirement
-              )}
-              tooltip="Total Basic + DA + perks till retirement (after 32% tax) from current date"
+              label={t('summary_expected_salary')}
+              value={formatCurrency(calculatedData.comparisonMetrics.salaryTillRetirement)}
+              tooltip={t('summary_tooltip_expected_salary')}
             />
             <SummaryItem
-              label="Expected Benefits Till Retirement"
-              value={formatCurrency(
-                calculatedData.comparisonMetrics.benefitsTillRetirement
-              )}
-              tooltip="Total PF + SBFP contributions till retirement (tax exempt)"
+              label={t('summary_expected_benefits')}
+              value={formatCurrency(calculatedData.comparisonMetrics.benefitsTillRetirement)}
+              tooltip={t('summary_tooltip_expected_benefits')}
             />
             <SummaryItem
-              label="Total Expected Financial Value"
-              value={formatCurrency(
-                calculatedData.comparisonMetrics.totalFinancials
-              )}
-              tooltip="Total value including salary (post-tax) and benefits (tax-exempt) if working till retirement"
+              label={t('summary_total_financial')}
+              value={formatCurrency(calculatedData.comparisonMetrics.totalFinancials)}
+              tooltip={t('summary_tooltip_total_financial')}
             />
             <SummaryItem
-              label="Financial Impact of VRS"
+              label={t('summary_vrs_impact')}
               value={formatCurrency(calculatedData.comparisonMetrics.vrsLoss)}
-              tooltip="Direct financial loss: Total receivables till retirement (excluding taxes) minus VRS amount after tax"
+              tooltip={t('summary_tooltip_vrs_impact')}
             />
             <SummaryItem
-              label="Net Impact with Interest"
-              value={formatCurrency(
-                calculatedData.comparisonMetrics.vrsLossWithInterest
-              )}
-              tooltip="Total financial impact considering VRS amount invested at 5.5% compound interest till retirement"
+              label={t('summary_net_impact')}
+              value={formatCurrency(calculatedData.comparisonMetrics.vrsLossWithInterest)}
+              tooltip={t('summary_tooltip_net_impact')}
               highlightType="BAD"
             />
           </dl>
@@ -250,23 +235,25 @@ function Summary() {
             to="/calculator"
             className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
           >
-            Recalculate
+            {t('summary_recalculate')}
           </Link>
           <button
             onClick={() => window.print()}
             className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
           >
-            Print Summary
+            {t('summary_print')}
           </button>
         </div>
 
         {/* Contact Me Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 print:hidden">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
             <div>
-              <h2 className="text-4xl font-semibold tracking-tight text-gray-900">Get in touch</h2>
-              <p className="mt-4 text-base text-gray-600">
-                Have feedback? Feel free to reach out at <a href="mailto:saiediitm@gmail.com" className="font-semibold text-indigo-600">
+              <h2 className="text-4xl font-semibold tracking-tight text-gray-900">
+                {t('summary_get_in_touch')}
+              </h2>
+              <p className="mt-4 text-base text-gray-600 font-mono">
+                {t('summary_feedback')} <a href="mailto:saiediitm@gmail.com" className="font-semibold text-indigo-600">
                   saiediitm@gmail.com
                 </a>
               </p>

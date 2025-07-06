@@ -1,6 +1,9 @@
 import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 
 function TaxDisclaimer() {
+    const { t } = useTranslation();
+
     return (
         <div className="rounded-md bg-yellow-50 p-4 mb-4">
             <div className="flex items-center">
@@ -9,7 +12,7 @@ function TaxDisclaimer() {
                 </div>
                 <div className="ml-3">
                 <div className="text-sm text-yellow-700">
-                    Tax calculations shown are for March 2025 VRS benefits. Please check against your chosen tax regime.
+                    {t('tax_disclaimer_message')}
                 </div>
                 </div>
             </div>

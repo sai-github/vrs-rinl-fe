@@ -3,6 +3,7 @@ import { forwardRef, useEffect, useState } from 'react';
 import { Control, Controller, useForm, UseFormGetValues } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
 
 import {
   calculateServicePeriod,
@@ -129,13 +130,15 @@ type CalculatorFormData = z.infer<typeof calculatorFormSchema>;
 
 function Calculator() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
+
   const [currentStep, setCurrentStep] = useState(1);
   const [calculatedData, setCalculatedData] = useState<CalculatedData | null>(
     null
   );
   const [steps, setSteps] = useState<Step[]>([
-    { id: 1, name: 'Your role information', status: 'current' },
-    { id: 2, name: 'Confirm your information', status: 'upcoming' }
+    { id: 1, name: t('calculator_role_info'), status: 'current' },
+    { id: 2, name: t('calculator_confirm_info'), status: 'upcoming' }
   ]);
   const [canUpdate, setCanUpdate] = useState(false);
   const [selectedField, setSelectedField] = useState<string | null>(null);
@@ -385,17 +388,17 @@ function Calculator() {
               <TaxDisclaimer />
 
               <h2 className="text-base/7 font-semibold text-gray-900">
-                Salary Details
+                {t('calculator_salary_details')}
               </h2>
               <p className="mt-1 text-sm/6 text-gray-600">
-                Enter your salary information for accurate benefit calculation.
+                {t('calculator_salary_info')}
               </p>
 
               <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 {/* Basic Pay */}
                 <div className="sm:col-span-3">
                   <label className="block text-sm/6 font-medium text-gray-900">
-                    Basic Pay
+                    {t('calculator_basic_pay')}
                   </label>
                   <div className="mt-2">
                     <input
@@ -414,14 +417,14 @@ function Calculator() {
                     )}
                   </div>
                   <p className="mt-1 text-sm text-gray-500">
-                    Enter your basic pay amount
+                    {t('calculator_basic_pay_help')}
                   </p>
                 </div>
 
                 {/* DA */}
                 <div className="sm:col-span-3">
                   <label className="block text-sm/6 font-medium text-gray-900">
-                    DA (Dearness Allowance)
+                    {t('calculator_da')}
                   </label>
                   <div className="mt-2">
                     <input
@@ -440,14 +443,14 @@ function Calculator() {
                     )}
                   </div>
                   <p className="mt-1 text-sm text-gray-500">
-                    Enter your dearness allowance amount
+                    {t('calculator_da_help')}
                   </p>
                 </div>
 
                 {/* Date of Joining */}
                 <div className="sm:col-span-3">
                   <label className="block text-sm/6 font-medium text-gray-900">
-                    Date of Joining
+                    {t('calculator_doj')}
                   </label>
                   <div className="mt-2">
                     <Controller
@@ -473,7 +476,7 @@ function Calculator() {
                 {/* Date of Retirement */}
                 <div className="sm:col-span-3">
                   <label className="block text-sm/6 font-medium text-gray-900">
-                    Date of Retirement
+                    {t('calculator_dor')}
                   </label>
                   <div className="mt-2">
                     <Controller
@@ -495,14 +498,14 @@ function Calculator() {
                     )}
                   </div>
                   <p className="mt-1 text-sm text-gray-500">
-                    Benefits are calculated based on 31st March 2025
+                    {t('calculator_dor_help')}
                   </p>
                 </div>
 
                 {/* PF Monthly Contribution */}
                 <div className="sm:col-span-3">
                   <label className="block text-sm/6 font-medium text-gray-900">
-                    PF Monthly Contribution (%)
+                    {t('calculator_pf')}
                   </label>
                   <div className="mt-2">
                     <input
@@ -518,16 +521,16 @@ function Calculator() {
                         {errors.pfMonthlyContribution.message}
                       </p>
                     )}
-                    <p className="mt-1 text-sm text-gray-500">
-                      Company contribution (12% of Basic plus DA)
-                    </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {t('calculator_pf_help')}
+                  </p>
                   </div>
                 </div>
 
                 {/* SBFP Monthly Contribution */}
                 <div className="sm:col-span-3">
                   <label className="block text-sm/6 font-medium text-gray-900">
-                    SBFP Monthly Contribution (%)
+                    {t('calculator_sbfp')}
                   </label>
                   <div className="mt-2">
                     <input
@@ -543,16 +546,16 @@ function Calculator() {
                         {errors.sbfpMonthlyContribution.message}
                       </p>
                     )}
-                    <p className="mt-1 text-sm text-gray-500">
-                      Company contribution (3% of Basic plus DA)
-                    </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {t('calculator_sbfp_help')}
+                  </p>
                   </div>
                 </div>
 
                 {/* Bank Interest Rate */}
                 <div className="sm:col-span-3">
                   <label className="block text-sm/6 font-medium text-gray-900">
-                    Bank Interest Rate (%)
+                    {t('calculator_bank_interest')}
                   </label>
                   <div className="mt-2">
                     <input
@@ -568,9 +571,9 @@ function Calculator() {
                         {errors.bankInterestRate.message}
                       </p>
                     )}
-                    <p className="mt-1 text-sm text-gray-500">
-                      Bank interest rate (5.5% optimistic assumption)
-                    </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {t('calculator_bank_interest_help')}
+                  </p>
                   </div>
                 </div>
               </div>
@@ -585,10 +588,10 @@ function Calculator() {
               <div className="flex justify-between items-center">
                 <div>
                   <h2 className="text-base/7 font-semibold text-gray-900">
-                    Service Period Details
+                    {t('calculator_service_details')}
                   </h2>
                   <p className="mt-1 text-sm/6 text-gray-600">
-                    Review and update your information if needed
+                    {t('calculator_review_info')}
                   </p>
                 </div>
                 {!canUpdate && (
@@ -597,7 +600,7 @@ function Calculator() {
                     onClick={() => setCanUpdate(true)}
                     className="rounded-md bg-indigo-50 px-3.5 py-2.5 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-100"
                   >
-                    Edit Values
+                    {t('calculator_edit')}
                   </button>
                 )}
                 {canUpdate && (
@@ -606,7 +609,7 @@ function Calculator() {
                     onClick={handleUpdate}
                     className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                   >
-                    Update Calculations
+                    {t('calculator_update')}
                   </button>
                 )}
               </div>
@@ -619,7 +622,7 @@ function Calculator() {
                       <EditableField
                         type="number"
                         {...register('basic', { valueAsNumber: true })}
-                        label="Basic Pay"
+                        label={t('calculator_basic_pay')}
                         value={formatCurrency(getValues('basic'))}
                         isEditing={canUpdate && selectedField === 'basic'}
                         onEdit={() => handleEdit('basic')}
@@ -635,7 +638,7 @@ function Calculator() {
                       <EditableField
                         type="number"
                         {...register('da', { valueAsNumber: true })}
-                        label="DA"
+                        label={t('calculator_da')}
                         value={formatCurrency(getValues('da'))}
                         isEditing={canUpdate && selectedField === 'da'}
                         onEdit={() => handleEdit('da')}
@@ -649,7 +652,7 @@ function Calculator() {
 
                     <div>
                       <EditableDateField
-                        label="Date of Joining"
+                        label={t('calculator_doj')}
                         name="dateOfJoining"
                         control={control}
                         isEditing={canUpdate && selectedField === 'dateOfJoining'}
@@ -665,7 +668,7 @@ function Calculator() {
 
                     <div>
                       <EditableDateField
-                        label="Date of Retirement"
+                        label={t('calculator_dor')}
                         name="dateOfRetirement"
                         control={control}
                         isEditing={canUpdate && selectedField === 'dateOfRetirement'}
@@ -686,15 +689,15 @@ function Calculator() {
                   <>
                     <div className="col-span-full">
                       <h3 className="text-sm font-medium text-gray-900 mb-4">
-                        Service Information
+                        {t('calculator_service_info')}
                       </h3>
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <ReadOnlyField
-                          label="Completed Service"
+                          label={t('calculator_completed_service')}
                           value={calculatedData.completedService}
                         />
                         <ReadOnlyField
-                          label="Service Left"
+                          label={t('calculator_service_left')}
                           value={calculatedData.leftOutService}
                         />
                       </div>
@@ -702,48 +705,48 @@ function Calculator() {
 
                     <div className="col-span-full">
                       <h3 className="text-sm font-medium text-gray-900 mb-4">
-                        Financial Details
+                        {t('calculator_financial_details')}
                       </h3>
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <ReadOnlyField
-                          label="Basic + DA"
+                          label={t('calculator_basic_da')}
                           value={calculatedData.basicPlusDA.toLocaleString(
-                            'en-IN',
+                            'en-IN', 
                             {
-                              style: 'currency',
-                              currency: 'INR'
+                            style: 'currency',
+                            currency: 'INR'
                             }
                           )}
                         />
                         <ReadOnlyField
-                          label="Per Day Salary"
+                          label={t('calculator_per_day')}
                           value={calculatedData.perDaySalary.toLocaleString(
-                            'en-IN',
+                            'en-IN', 
                             {
-                              style: 'currency',
-                              currency: 'INR'
-                            }
-                          )}
+                            style: 'currency',
+                            currency: 'INR'
+                          }
+                        )}
                         />
                         <ReadOnlyField
-                          label="PF Contribution"
+                          label={t('calculator_pf_contribution')}
                           value={calculatedData.pfContribution.toLocaleString(
-                            'en-IN',
+                            'en-IN', 
                             {
-                              style: 'currency',
-                              currency: 'INR'
-                            }
-                          )}
+                            style: 'currency',
+                            currency: 'INR'
+                          }
+                        )}
                         />
                         <ReadOnlyField
-                          label="SBFP Contribution"
+                          label={t('calculator_sbfp_contribution')}
                           value={calculatedData.sbfpContribution.toLocaleString(
-                            'en-IN',
+                            'en-IN', 
                             {
-                              style: 'currency',
-                              currency: 'INR'
-                            }
-                          )}
+                            style: 'currency',
+                            currency: 'INR'
+                          }
+                        )}
                         />
                       </div>
                     </div>
@@ -813,14 +816,14 @@ function Calculator() {
             icon="heroicons:arrow-left"
             className="inline-block w-5 h-5 mr-2"
           />
-          Previous
+          {t('common_previous')}
         </button>
         {currentStep !== steps.length ? (
           <button
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
             onClick={handleNext}
           >
-            Next
+            {t('common_next')}
             <Icon
               icon="heroicons:arrow-right"
               className="inline-block w-5 h-5 ml-2"
@@ -831,7 +834,7 @@ function Calculator() {
             className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
             onClick={handleSubmit}
           >
-            Finish
+            {t('common_finish')}
           </button>
         )}
       </div>
