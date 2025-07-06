@@ -1,4 +1,13 @@
 {
   "home": "Home",
-  "vrs_calculator": "VRS Calculator"
+  "vrs_calculator": "VRS Calculator",
+  "home_title": "VRS information for<1 /><0>Vizag Steel Plant</0><1 />Employees",
+  "home_paragraph": "We provide the insights you need to make an informed decision about the Voluntary Retirement Scheme. Our calculator helps you evaluate the financial implications of early retirement versus continued employment.",
+  "blooms_alt": "Blooms manufactured in Steel Plant",
+  "man_working_alt": "Man working in hot conditions",
+  "molten_steel_alt": "Molten steel flowing",
+  "rebars_alt": "TMT Rebars manufactured in Steel Plant",
+  "steel_plant_alt": "Aerial view of Steel Plant",
+  "inside_plant_alt": "Blooms coming out of the furnace",
+  "vizag_ukku_alt": "Vizag Ukku embedded on the final product"
 }
